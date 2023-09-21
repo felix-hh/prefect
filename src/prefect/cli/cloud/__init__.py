@@ -353,6 +353,7 @@ async def login(
     current_profile_is_logged_in = current_profile.name in already_logged_in_profiles
 
     if current_profile_is_logged_in:
+        # Profile is already logged in
         app.console.print("It looks like you're already authenticated on this profile.")
         should_reauth = typer.confirm(
             "? Would you like to reauthenticate?", default=False
@@ -363,27 +364,22 @@ async def login(
 
     elif already_logged_in_profiles:
         app.console.print(
-            "It looks like you're already authenticated with another profile."
+            "It looks like you're already authenticated with other profile(s)."
         )
-        if not typer.confirm(
-            "? Would you like to reauthenticate with this profile?", default=False
+        if typer.confirm(
+            "? Would you like to switch to an authenticated profile?", default=True
         ):
-            if typer.confirm(
-                "? Would you like to switch to an authenticated profile?", default=True
-            ):
-                profile_name = prompt_select_from_list(
-                    app.console,
-                    "Which authenticated profile would you like to switch to?",
-                    already_logged_in_profiles,
-                )
+            profile_name = prompt_select_from_list(
+                app.console,
+                "Which authenticated profile would you like to switch to?",
+                already_logged_in_profiles,
+            )
 
-                profiles.set_active(profile_name)
-                save_profiles(profiles)
-                exit_with_success(
-                    f"Switched to authenticated profile {profile_name!r}."
-                )
-            else:
-                return
+            profiles.set_active(profile_name)
+            save_profiles(profiles)
+            exit_with_success(
+                f"Switched to authenticated profile {profile_name!r}."
+            )
 
     if not key:
         choice = prompt_select_from_list(
